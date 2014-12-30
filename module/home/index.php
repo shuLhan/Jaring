@@ -4,6 +4,7 @@
 	Authors:
 		- mhd.sulhan (m.shulhan@gmail.com)
 */
+$no_cookies = true;
 require_once "../tpl_index_header.php";
 ?>
 	<!-- Add custom css/javascript here. -->
