@@ -11,6 +11,8 @@ function __autoload($class_name) {
 }
 
 Jaring::init ();
+
+// for security, always check for cookies.
 if (! isset ($no_cookies)) {
 	Jaring::cookies_check ();
 }

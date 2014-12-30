@@ -229,13 +229,9 @@ class Jaring
 //{{{ cookie : check if user has cookie.
 	public static function cookies_check ()
 	{
-		$p_home	= strpos ($_SERVER["REQUEST_URI"], self::$_mod_home);
-
 		if (0 === self::$_c_uid) {
-			if (false === $p_home) {
-				header ("Location:". self::$_mod_home);
-				exit ();
-			}
+			header ("Location:". self::$_mod_home);
+			exit ();
 		}
 	}
 //}}}

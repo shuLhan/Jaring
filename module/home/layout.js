@@ -55,7 +55,7 @@ function JxLogin ()
 
 	this.panel				= Ext.create ("Jx.Form", {
 			id				:this.id +"Form"
-		,	url				:_g_module_path +"login"+ _g_ext
+		,	url				:Jx.generateModDir ("login")
 		,	createButtonBar	:false
 		,	syncUseStore	:false
 		,	defaults		:

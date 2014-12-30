@@ -4,6 +4,8 @@
 	Authors:
 		- mhd.sulhan (m.shulhan@gmail.com)
 */
+$no_cookies = true;
+
 require_once "../json_begin.php";
 
 try {
