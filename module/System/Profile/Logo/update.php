@@ -24,13 +24,12 @@ try {
 		Jaring::$_db_ps->execute ();
 		Jaring::$_db->commit ();
 
-		Jaring::$_out["success"] = true;
-		Jaring::$_out["data"] = "New logo has been uploaded.";
+		Jaring::$_out->set (true, "New logo has been uploaded");
 	} else {
-		Jaring::$_out["data"] = $_FILES["logo"]["error"];
+		Jaring::$_out->_data = $_FILES["logo"]["error"];
 	}
 } catch (Exception $e) {
-	Jaring::$_out["data"] = addslashes ($e->getMessage ());
+	Jaring::$_out->_data = addslashes ($e->getMessage ());
 }
 
 header('Content-Type: application/json');

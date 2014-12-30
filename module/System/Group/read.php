@@ -42,7 +42,7 @@ function get_group ($pid, $depth)
 		if (count ($c) <= 0) {
 			$m["leaf"]			= true;
 		} else {
-			$m["children"]		= $c;
+			$m["data"]			= $c;
 			$m["expandable"]	= true;
 			$m["expanded"]		= true;
 			$m["loaded"]		= true;
@@ -54,5 +54,4 @@ function get_group ($pid, $depth)
 
 $data = get_group (0, 0);
 
-Jaring::$_out["success"]	= true;
-Jaring::$_out["children"]	= $data;
+Jaring::$_out->set (true, (array) $data);

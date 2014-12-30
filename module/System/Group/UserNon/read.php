@@ -50,6 +50,8 @@ $q	="
 	. $qorder
 	. $qlimit;
 
-Jaring::$_out['total']		= Jaring::db_execute ($qtotal, $qbind)[0]["total"];
-Jaring::$_out['data']		= Jaring::db_execute ($q, $qbind);
-Jaring::$_out['success']	= true;
+Jaring::$_out->set (
+		true
+		, Jaring::db_execute ($q, $qbind)
+		, Jaring::db_execute ($qtotal, $qbind)[0]["total"]
+);

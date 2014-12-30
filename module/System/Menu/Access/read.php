@@ -56,7 +56,7 @@ function get_system_menu ($gid, $pid, $depth)
 		if (count ($c) <= 0) {
 			$m['leaf'] = true;
 		} else {
-			$m['children']		= $c;
+			$m['data']		= $c;
 			$m['expandable']	= true;
 			$m['expanded']		= true;
 			$m['loaded']		= true;
@@ -74,5 +74,4 @@ if ($gid <= 0) {
 
 $menus = get_system_menu ($gid, 0, 0);
 
-Jaring::$_out['success']	= true;
-Jaring::$_out["children"]	= $menus;
+Jaring::$_out->set (true, (array) $menus);

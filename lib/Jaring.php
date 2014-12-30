@@ -4,6 +4,9 @@
 	Authors:
 		- mhd.sulhan (m.shulhan@gmail.com)
 */
+
+include "JaringOut.php";
+
 //{{{ util: safely open PDO class.
 class SafePDO extends PDO
 {
@@ -90,11 +93,8 @@ class Jaring
 							]
 						];
 
-	public static $_out	= [
-							"success"	=> false
-						,	"data"		=> ""
-						,	"total"		=> 0
-						];
+	public static $_out = null;
+
 	//
 	//	Cookies values.
 	//	Variables that will be instantiated when calling cookies_get.
@@ -103,6 +103,10 @@ class Jaring
 	public static $_c_username		= "Anonymous";
 	public static $_c_profile_id	= 0;
 //}}}
+
+	public function __construct ()
+	{}
+
 //{{{ f : implode with additional string for prefix and suffix of each array item.
 	public static function implode_with_circumfix ($sep, $array, $prefix, $suffix)
 	{
@@ -264,6 +268,8 @@ class Jaring
 			self::$_db_pass			= $app_conf["db.password"];
 			self::$_db_pool_min		= $app_conf["db.pool.min"];
 			self::$_db_pool_max		= $app_conf["db.pool.max"];
+
+			Jaring::$_out = new JaringOut ();
 
 			self::cookies_get ();
 		} catch (Exception $e) {
@@ -553,12 +559,10 @@ class Jaring
 		// Get data
 		$qread	= $qselect . $qfrom . $qwhere . $qorder . $qlimit;
 
-		self::$_out["total"]	= $t;
-		self::$_out["data"]		= self::db_execute ($qread);
-		self::$_out["success"]	= true;
+		self::$_out->set (true, self::db_execute ($qread), $t);
 
 		if (function_exists ("request_read_after")) {
-			request_read_after (self::$_out["data"]);
+			request_read_after (self::$_out->_data);
 		}
 	}
 //}}}
@@ -602,8 +606,7 @@ class Jaring
 			}
 		}
 
-		self::$_out["success"]	= true;
-		self::$_out["data"]		= self::$MSG_SUCCESS_CREATE;
+		self::$_out->set (true, self::$MSG_SUCCESS_CREATE);
 	}
 //}}}
 //{{{ crud -> db : handle update request
@@ -649,8 +652,7 @@ class Jaring
 			}
 		}
 
-		self::$_out["success"] = true;
-		self::$_out["data"]	= self::$MSG_SUCCESS_UPDATE;
+		self::$_out->set (true, self::$MSG_SUCCESS_UPDATE);
 	}
 //}}}
 //{{{ crud -> db : handle delete request
@@ -691,8 +693,7 @@ class Jaring
 			}
 		}
 
-		self::$_out["success"]	= true;
-		self::$_out["data"]		= self::$MSG_SUCCESS_DESTROY;
+		self::$_out->set (true, self::$MSG_SUCCESS_DESTROY);
 	}
 //}}}
 
@@ -727,7 +728,7 @@ class Jaring
 			break;
 		}
 
-		self::$_out["data"] = $msg;
+		self::$_out->_data = $msg;
 		return false;
 	}
 //}}}
@@ -891,7 +892,7 @@ class Jaring
 			self::request_switch ($path, $access, $data);
 			self::$_db->commit ();
 		} catch (Exception $e) {
-			self::$_out["data"] = addslashes ($e->getMessage ());
+			self::$_out->_data = addslashes ($e->getMessage ());
 		}
 
 		header("Content-Type: application/json");

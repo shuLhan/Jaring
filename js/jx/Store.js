@@ -144,12 +144,12 @@ Ext.define ("Jx.StoreTree", {
 ,	alias				:"jx.storetree"
 ,	config				:
 	{
-		defaultRootProperty	:"children"
+		defaultRootProperty	:"data"
 	,	root				:
 		{
 			text				:""
 		,	expanded			:true
-		,	children			:[]
+		,	data				:[]
 		}
 	,	proxy				:
 		{
@@ -158,7 +158,7 @@ Ext.define ("Jx.StoreTree", {
 		,	reader			:
 			{
 				type			:"json"
-			,	root			:"children"
+			,	root			:"data"
 			}
 		}
 	}

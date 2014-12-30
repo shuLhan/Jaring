@@ -63,6 +63,7 @@ $qread	= $qselect
 		. $qorder
 		. $qlimit;
 
-Jaring::$_out["total"]		= (int) Jaring::db_execute ($qtotal)[0]["total"];
-Jaring::$_out["data"]		= Jaring::db_execute ($qread);
-Jaring::$_out["success"]	= true;
+Jaring::$_out->set (true
+	, Jaring::db_execute ($qread);
+	, (int) Jaring::db_execute ($qtotal)[0]["total"];
+);

@@ -40,5 +40,4 @@
 	Jaring::$_db_ps->execute ($bindv);
 	Jaring::$_db_ps->closeCursor ();
 
-	Jaring::$_out["success"]	= true;
-	Jaring::$_out["data"]		= Jaring::$MSG_SUCCESS_CREATE;
+	Jaring::$_out->set (true, self::$MSG_SUCCESS_CREATE);
