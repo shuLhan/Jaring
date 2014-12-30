@@ -12,8 +12,8 @@ function __autoload($class_name) {
 
 Jaring::init ();
 
-if (Jaring::$_c_uid != 0) {
-	header ("Location:". Jaring::$_mod_main);
-} else {
+if (Jaring::$_c_uid == 0) {
 	header ("Location:". Jaring::$_mod_home);
+} else {
+	header ("Location:". Jaring::$_mod_main);
 }
