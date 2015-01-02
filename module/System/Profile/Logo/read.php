@@ -7,17 +7,17 @@
 $no_cookies = true;
 require_once "../../../init.php";
 
-Jaring::db_init ();
+Jaring::$_db->init ();
 
 $q = "select logo_type, logo from _profile where id = ?";
 
-Jaring::$_db_ps = Jaring::$_db->prepare ($q);
+$ps = Jaring::$_db->_dbo->prepare ($q);
 
-Jaring::$_db_ps->execute (array ($_GET["_profile_id"]));
+$ps->execute (array ($_GET["_profile_id"]));
 
-Jaring::$_db_ps->bindColumn (1, $type, PDO::PARAM_STR);
-Jaring::$_db_ps->bindColumn (2, $lob, PDO::PARAM_LOB);
-Jaring::$_db_ps->fetch (PDO::FETCH_BOUND);
+$ps->bindColumn (1, $type, PDO::PARAM_STR);
+$ps->bindColumn (2, $lob, PDO::PARAM_LOB);
+$ps->fetch (PDO::FETCH_BOUND);
 
 header ("Content-Type: $type");
 echo $lob;

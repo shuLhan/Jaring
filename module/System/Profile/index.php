@@ -49,16 +49,16 @@ function update_logo ()
 	$id = $_POST["id"];
 	$q = "update _profile set logo_type = ? , logo = ? where id = ?";
 
-	Jaring::$_db_ps = Jaring::$_db->prepare ($q);
+	$ps = Jaring::$_db->_dbo->prepare ($q);
 
 	$fp = fopen ($_FILES["logo"]["tmp_name"], "rb");
 
 	$i = 1;
-	Jaring::$_db_ps->bindParam ($i++, $_FILES["logo"]["type"]);
-	Jaring::$_db_ps->bindParam ($i++, $fp, PDO::PARAM_LOB);
-	Jaring::$_db_ps->bindParam ($i++, $id);
+	$ps->bindParam ($i++, $_FILES["logo"]["type"]);
+	$ps->bindParam ($i++, $fp, PDO::PARAM_LOB);
+	$ps->bindParam ($i++, $id);
 
-	Jaring::$_db_ps->execute ();
+	$ps->execute ();
 
 	return true;
 }
@@ -73,7 +73,7 @@ function request_create_after ($data)
 
 	$profile_id = $data[0]["id"];
 	$user_id	= $data[0]["_user_id"];
-	$gid		= Jaring::db_generate_id ();
+	$gid		= Jaring::$_db->generate_id ();
 
 	// insert profile's admin
 	$q	= "
@@ -81,7 +81,7 @@ function request_create_after ($data)
 		values ($profile_id, $user_id)
 		";
 
-	Jaring::db_execute ($q, null, false);
+	Jaring::$_db->execute ($q, null, false);
 
 	// update user profile id.
 	$q = "
@@ -92,7 +92,7 @@ function request_create_after ($data)
 
 	$qbind = array ($profile_id, $user_id);
 
-	Jaring::db_execute ($q, $qbind, false);
+	Jaring::$_db->execute ($q, $qbind, false);
 
 	// add group Administrator to group.
 	$q	= "
@@ -100,16 +100,16 @@ function request_create_after ($data)
 		values ($profile_id, $gid, 0, 'Administrator', 0)
 		";
 
-	Jaring::db_execute ($q, null, false);
+	Jaring::$_db->execute ($q, null, false);
 
 	// add user to group Administrator.
-	$id = Jaring::db_generate_id();
+	$id = Jaring::$_db->generate_id ();
 	$q	="
 		insert into _user_group (_profile_id, id, _user_id, _group_id)
 		values ($profile_id, $id, $user_id, $gid)
 		";
 
-	Jaring::db_execute ($q, null, false);
+	Jaring::$_db->execute ($q, null, false);
 
 	// add menu access.
 	$q	="
@@ -119,7 +119,7 @@ function request_create_after ($data)
 			where	_group_id = 1
 		";
 
-	Jaring::db_execute ($q, null, false);
+	Jaring::$_db->execute ($q, null, false);
 }
 
 function request_update_after ($data)
@@ -146,17 +146,17 @@ function request_delete_before ($data)
 			)
 			";
 
-		Jaring::db_execute ($q, null, false);
+		Jaring::$_db->execute ($q, null, false);
 
 		// delete group of user.
 		$q =" delete from _user_group where _profile_id = $profile_id";
 
-		Jaring::db_execute ($q, null, false);
+		Jaring::$_db->execute ($q, null, false);
 
 		// delete group.
 		$q =" delete from _group where _profile_id = $profile_id";
 
-		Jaring::db_execute ($q, null, false);
+		Jaring::$_db->execute ($q, null, false);
 
 		// set admin of profile back to be owned by super admin.
 		$q = "
@@ -169,17 +169,17 @@ function request_delete_before ($data)
 			)
 			";
 
-		Jaring::db_execute ($q, null, false);
+		Jaring::$_db->execute ($q, null, false);
 
 		// delete users.
 		$q =" delete from _user where _profile_id = $profile_id";
 
-		Jaring::db_execute ($q, null, false);
+		Jaring::$_db->execute ($q, null, false);
 
 		// delete profile admin
 		$q =" delete from _profile_admin where _profile_id = $profile_id ";
 
-		Jaring::db_execute ($q, null, false);
+		Jaring::$_db->execute ($q, null, false);
 	}
 
 	return true;

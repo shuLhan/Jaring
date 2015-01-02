@@ -25,7 +25,7 @@
 
 		// delete old file content
 		$q	=" select path from _media where id = ". $_POST["id"];
-		$rs = Jaring::db_execute ($q);
+		$rs = Jaring::$_db->execute ($q);
 
 		if (count ($rs) > 0) {
 			unlink (APP_PATH ."/". $rs[0]["path"]);
@@ -44,10 +44,7 @@
 		$bindv[5]	= Jaring::$_media_dir . $sha1;
 	}
 
-	Jaring::db_prepare_update ($table, $fields, $ids);
-
-	Jaring::$_db_ps->execute ($bindv);
-	Jaring::$_db_ps->closeCursor ();
+	Jaring::$_db->execute_update ($table, $fields, $ids, $bindv);
 
 	if ($_FILES["content"]["error"] === UPLOAD_ERR_OK) {
 		move_uploaded_file ($_FILES["content"]["tmp_name"], APP_PATH ."/". $bindv[5]);

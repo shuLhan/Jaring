@@ -22,8 +22,9 @@ function request_delete_before ($data)
 	// Delete group menu access
 	$q = "delete from _group_menu where _group_id = ?";
 
+	$ps = Jaring::$_db->_dbo->prepare ($q);
+
 	foreach ($data as $d) {
-		$ps = Jaring::$_db->prepare ($q);
 		$ps->execute (array ($d["id"]));
 		$ps->closeCursor ();
 	}

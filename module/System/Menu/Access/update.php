@@ -23,7 +23,7 @@
 			."	where	_menu_id	= ?"
 			."	and		_group_id	= ?";
 
-		$ps = Jaring::$_db->prepare ($q);
+		$ps = Jaring::$_db->_dbo->prepare ($q);
 		$i	= 1;
 		$ps->bindValue ($i++, $menu_id, PDO::PARAM_INT);
 		$ps->bindValue ($i++, $gid, PDO::PARAM_INT);
@@ -36,7 +36,7 @@
 			."	,	permission"
 			."	) values ( ? , ? , ? )";
 
-		$ps = Jaring::$_db->prepare ($q);
+		$ps = Jaring::$_db->_dbo->prepare ($q);
 		$i	= 1;
 		$ps->bindValue ($i++, $menu_id, PDO::PARAM_INT);
 		$ps->bindValue ($i++, $gid, PDO::PARAM_INT);

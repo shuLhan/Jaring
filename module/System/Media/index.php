@@ -34,7 +34,7 @@ function request_delete_before ($data)
 				from ". Jaring::$_mod["db_table"]["name"] ."
 				where id = ". $d["id"];
 
-		$rs = Jaring::db_execute ($q);
+		$rs = Jaring::$_db->execute ($q);
 
 		if (count ($rs) > 0) {
 			$f = APP_PATH . $rs[0]["path"];
@@ -46,7 +46,7 @@ function request_delete_before ($data)
 		// delete link to media table.
 		$q	= "delete from _media_table where _media_id = ". $d["id"];
 
-		Jaring::db_execute ($q, null, false);
+		Jaring::$_db->execute ($q, null, false);
 	}
 
 	return true;

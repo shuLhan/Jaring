@@ -38,14 +38,14 @@ function request_read_after (&$data)
 		and		UG._user_id		= ?
 		";
 
-	Jaring::$_db_ps = Jaring::$_db->prepare ($q);
+	$ps = Jaring::$_db->_dbo->prepare ($q);
 
 	foreach ($data as &$d) {
-		Jaring::$_db_ps->execute (array ($d["id"]));
+		$ps->execute (array ($d["id"]));
 
-		$rs = Jaring::$_db_ps->fetchAll (PDO::FETCH_COLUMN, 0);
+		$rs = $ps->fetchAll (PDO::FETCH_COLUMN, 0);
 
-		Jaring::$_db_ps->closeCursor ();
+		$ps->closeCursor ();
 
 		// add empty password.
 		$d["password"] = "";
@@ -93,7 +93,7 @@ function request_delete_before ($data)
 			where	_user_id = $user_id
 			";
 
-		$rs = Jaring::db_execute ($q, null);
+		$rs = Jaring::$_db->execute ($q, null);
 
 		if ((int) $rs[0]["n"] > 0) {
 			throw new Exception (Jaring::$MSG_ADMIN_PROFILE);

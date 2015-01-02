@@ -9,20 +9,17 @@
 	$fields	= [ "id", "name", "extension", "size", "mime", "path" ];
 	$fupath	= Jaring::$_media_dir . sha1_file ($_FILES["content"]["tmp_name"]);
 
-	Jaring::db_prepare_insert ($table, $fields);
-
 	$pi = pathinfo ($_FILES["content"]["name"]);
 
 	$bindv		= [];
-	$bindv[]	= Jaring::db_generate_id ();
+	$bindv[]	= Jaring::$_db->generate_id ();
 	$bindv[]	= $pi["filename"];
 	$bindv[]	= $pi["extension"];
 	$bindv[]	= $_FILES["content"]["size"];
 	$bindv[]	= $_FILES["content"]["type"];
 	$bindv[]	= $fupath;
 
-	Jaring::$_db_ps->execute ($bindv);
-	Jaring::$_db_ps->closeCursor ();
+	Jaring::execute_insert ($table, $fields, $bindv);
 
 	move_uploaded_file ($_FILES["content"]["tmp_name"], APP_PATH ."/". $fupath);
 
@@ -36,8 +33,6 @@
 			,	$id
 			];
 
-	Jaring::db_prepare_insert ($table, $fields);
-	Jaring::$_db_ps->execute ($bindv);
-	Jaring::$_db_ps->closeCursor ();
+	Jaring::execute_insert ($table, $fields, $bindv);
 
 	Jaring::$_out->set (true, self::$MSG_SUCCESS_CREATE);

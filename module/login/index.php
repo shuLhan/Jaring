@@ -27,10 +27,9 @@ try {
 		and		password	= ?
 		";
 
-	$ps = Jaring::$_db->prepare ($q);
-	$ps->execute (array ($data['username'], hash ("sha256", $data['password'])));
-	$rs = $ps->fetchAll ();
-	$ps->closeCursor ();
+	$rs = Jaring::$_db->execute ($q
+			, array ($data['username'], hash ("sha256", $data['password']))
+			, true);
 
 	if (count ($rs) === 0) {
 		throw new Exception ("Invalid username or password!");
@@ -47,9 +46,7 @@ try {
 		where	id			= ?
 		";
 
-	$ps = Jaring::$_db->prepare ($q);
-	$ps->bindValue (1, $rs[0]['id']);
-	$ps->execute ();
+	Jaring::$_db->execute ($q, array ($rs[0]['id']), false);
 
 	// Set cookies values.
 	setcookie ("user_id", $rs[0]['id'], 0, Jaring::$_path);

@@ -33,10 +33,7 @@ function get_system_menu ($gid, $pid, $depth)
 		order by	A.id
 	";
 
-	$ps = Jaring::$_db->prepare ($q);
-	$ps->execute (array ($gid, $gid, $pid, $pid));
-	$rs = $ps->fetchAll (PDO::FETCH_ASSOC);
-	$ps->closeCursor ();
+	$rs = Jaring::$_db->execute ($q, array ($gid, $gid, $pid, $pid), true);
 
 	$index = 0;
 	foreach ($rs as &$m) {

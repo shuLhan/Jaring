@@ -52,6 +52,6 @@ $q	="
 
 Jaring::$_out->set (
 		true
-		, Jaring::db_execute ($q, $qbind)
-		, Jaring::db_execute ($qtotal, $qbind)[0]["total"]
+		, Jaring::$_db->execute ($q, $qbind)
+		, Jaring::$_db->execute ($qtotal, $qbind)[0]["total"]
 );

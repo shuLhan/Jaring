@@ -27,9 +27,8 @@ try {
 		and		C._profile_id	= ?
 		";
 
-	$ps = Jaring::$_db->prepare ($q);
-	$ps->execute (array (Jaring::$_c_uid, $pid, Jaring::$_c_profile_id));
-	$rs = $ps->fetchAll (PDO::FETCH_ASSOC);
+	$rs = Jaring::$_db->execute ($q
+			, array (Jaring::$_c_uid, $pid, Jaring::$_c_profile_id));
 
 	foreach ($rs as &$m) {
 		$m["image_path"] = str_replace (" ", "-", (string) $m["image"]);

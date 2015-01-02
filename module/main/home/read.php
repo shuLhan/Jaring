@@ -24,15 +24,13 @@ try {
 		order by A.pid, A.id asc
 		";
 
-	$ps = Jaring::$_db->prepare ($q);
-	$ps->execute (array (Jaring::$_c_uid, Jaring::$_c_profile_id));
-	$rs_parents = $ps->fetchAll (PDO::FETCH_ASSOC);
-	$ps->closeCursor ();
-	$ps	= null;
+	$rs = Jaring::$_db->execute ($q
+			, array (Jaring::$_c_uid, Jaring::$_c_profile_id)
+			, true);
 
 	$r['success']	= true;
-	$r['data']		= $rs_parents;
-	$r['total']		= count ($rs_parents);
+	$r['data']		= $rs;
+	$r['total']		= count ($rs);
 }
 catch (Exception $e) {
 	$r['data']		= $e->getMessage ();

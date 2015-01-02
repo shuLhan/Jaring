@@ -53,7 +53,7 @@ function request_delete_before ($data)
 			and		UG.id			= $ug_id
 			";
 
-		$rs = Jaring::db_execute ($q, null);
+		$rs = Jaring::$_db->execute ($q, null);
 
 		if ((int) $rs[0]["n"] > 0) {
 			throw new Exception (Jaring::$MSG_ADMIN_PROFILE);

@@ -18,10 +18,9 @@ function get_group ($pid, $depth)
 			order by	A.id
 		";
 
-	$ps	= Jaring::$_db->prepare ($q);
-	$ps->execute (array (Jaring::$_c_profile_id, $pid));
-	$rs	= $ps->fetchAll (PDO::FETCH_ASSOC);
-	$ps->closeCursor ();
+	$rs = Jaring::$_db->execute ($q
+			, array (Jaring::$_c_profile_id, $pid)
+			, true);
 
 	$index = 0;
 	foreach ($rs as &$m) {

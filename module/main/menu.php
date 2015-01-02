@@ -27,10 +27,9 @@ function getMenu ($uid, $pid)
 		."	group by A.id"
 		."	order by A.id";
 
-	$ps = Jaring::$_db->prepare ($q);
-	$ps->execute (array ($pid, $uid, Jaring::$_c_profile_id));
-	$rs = $ps->fetchAll (PDO::FETCH_ASSOC);
-	$ps->closeCursor ();
+	$rs = Jaring::$_db->execute ($q
+			, array ($pid, $uid, Jaring::$_c_profile_id)
+			, true);
 
 	foreach ($rs as &$menu) {
 		$menu['enableToggle'] = true;
@@ -64,10 +63,9 @@ try {
 		."	and		B.permission	> 0"
 		."	order by A.id";
 
-	$ps = Jaring::$_db->prepare ($q);
-	$ps->execute (array (Jaring::$_c_uid, Jaring::$_c_profile_id));
-	$rs = $ps->fetchAll (PDO::FETCH_ASSOC);
-	$ps->closeCursor ();
+	$rs = Jaring::$_db->execute ($q
+			, array (Jaring::$_c_uid, Jaring::$_c_profile_id)
+			, true);
 
 	foreach ($rs as &$menu) {
 		$menu_items = getMenu (Jaring::$_c_uid, $menu['menu_id']);

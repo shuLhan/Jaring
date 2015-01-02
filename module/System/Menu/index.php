@@ -38,7 +38,7 @@ function request_delete_before ($data)
 	}
 
 	$q	=" delete from _group_menu where _menu_id = ? ";
-	$ps	= Jaring::$_db->prepare ($q);
+	$ps	= Jaring::$_db->_dbo->prepare ($q);
 
 	foreach ($data as $d) {
 		$ps->bindValue (1, $d["id"], PDO::PARAM_INT);

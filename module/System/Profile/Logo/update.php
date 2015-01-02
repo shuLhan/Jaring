@@ -12,24 +12,24 @@ try {
 	if (UPLOAD_ERR_OK === $_FILES["logo"]["error"]) {
 		$q = "update _profile set logo_type = ? , logo = ?";
 
-		Jaring::$_db_ps = Jaring::$_db->prepare ($q);
+		$ps = Jaring::$_db->_dbo->prepare ($q);
 
 		$fp = fopen ($_FILES["logo"]["tmp_name"], "rb");
 
 		$i = 1;
-		Jaring::$_db_ps->bindParam ($i++, $_FILES["logo"]["type"]);
-		Jaring::$_db_ps->bindParam ($i++, $fp, PDO::PARAM_LOB);
+		$ps->bindParam ($i++, $_FILES["logo"]["type"]);
+		$ps->bindParam ($i++, $fp, PDO::PARAM_LOB);
 
-		Jaring::$_db->beginTransaction ();
-		Jaring::$_db_ps->execute ();
-		Jaring::$_db->commit ();
+		Jaring::$_db->_dbo->beginTransaction ();
+		$ps->execute ();
+		Jaring::$_db->_dbo->commit ();
 
 		Jaring::$_out->set (true, "New logo has been uploaded");
 	} else {
-		Jaring::$_out->_data = $_FILES["logo"]["error"];
+		Jaring::$_out->data = $_FILES["logo"]["error"];
 	}
 } catch (Exception $e) {
-	Jaring::$_out->_data = addslashes ($e->getMessage ());
+	Jaring::$_out->data = addslashes ($e->getMessage ());
 }
 
 header('Content-Type: application/json');

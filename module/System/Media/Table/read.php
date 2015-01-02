@@ -64,6 +64,6 @@ $qread	= $qselect
 		. $qlimit;
 
 Jaring::$_out->set (true
-	, Jaring::db_execute ($qread);
-	, (int) Jaring::db_execute ($qtotal)[0]["total"];
+	, Jaring::$_db->execute ($qread);
+	, (int) Jaring::$_db->execute ($qtotal)[0]["total"];
 );

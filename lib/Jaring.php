@@ -6,29 +6,7 @@
 */
 
 include "JaringOut.php";
-
-//{{{ util: safely open PDO class.
-class SafePDO extends PDO
-{
-	public static function exception_handler($exception)
-	{
-		// Output the exception details
-		die("Uncaught exception: ". $exception->getMessage());
-	}
-
-	public function __construct($dsn, $username="", $password="", $driver_options=array())
-	{
-		// Temporarily change the PHP exception handler while we . . .
-		set_exception_handler(array(__CLASS__, "exception_handler"));
-
-		// . . . create a PDO object
-		parent::__construct($dsn, $username, $password, $driver_options);
-
-		// Change the exception handler back to whatever it was before
-		restore_exception_handler();
-	}
-}
-//}}}
+include "JaringDB.php";
 
 class Jaring
 {
@@ -61,14 +39,7 @@ class Jaring
 	public static $_menu_mode		= 1;
 	public static $_paging_size		= 50;
 	public static $_media_dir		= "media";
-	public static $_db_class		= "";
-	public static $_db_url			= "";
-	public static $_db_user			= "";
-	public static $_db_pass			= "";
-	public static $_db_pool_min		= 0;
-	public static $_db_pool_max		= 100;
 	public static $_db				= null;
-	public static $_db_ps			= null;
 
 	//	Module configuration. Set by each modules index.
 	public static $_mod	= [
@@ -120,95 +91,6 @@ class Jaring
 		}
 
 		return $r;
-	}
-//}}}
-//{{{ db : check user access to module
-	public static function check_user_access ($mod, $uid, $access)
-	{
-		$q	="
-				select	GM.permission
-				from	_user			U
-				,		_group			G
-				,		_user_group		UG
-				,		_menu			M
-				,		_group_menu		GM
-				where	GM._group_id	= G.id
-				and		GM._menu_id		= M.id
-				and		UG._group_id	= G.id
-				and		UG._user_id		= U.id
-				and		M.module		= '". $mod ."'
-				and		U.id			= ". $uid ."
-				order by GM.permission desc
-				limit	0,1
-			";
-
-		$rs = self::db_execute ($q);
-
-		if (count ($rs) <= 0) {
-			return false;
-		}
-		if (((int) $rs[0]["permission"]) >= $access) {
-			return true;
-		}
-
-		return false;
-	}
-//}}}
-//{{{ db : initialize sqlite database.
-	public static function db_init_sqlite ()
-	{
-		// Check if sqlite is file or memory.
-		$a = explode(":", self::$_db_url);
-
-		if (count ($a) === 2) {
-			// sqlite is file based, recreate db url using app. path.
-			$a[1] = $f_db	= APP_PATH . $a[1];
-			self::$_db_url	= implode (":", $a);
-
-			if (file_exists ($f_db)) {
-				self::db_create ();
-				return;
-			}
-		}
-
-		self::db_create ();
-
-		// Populate new database file.
-		$f_sql = APP_PATH ."/db/init.ddl.sql";
-		self::db_execute_script ($f_sql);
-
-		$f_sql = APP_PATH ."/db/init.dml.sql";
-		self::db_execute_script ($f_sql);
-
-		$f_sql = APP_PATH ."/db/app.sql";
-		self::db_execute_script ($f_sql);
-
-		// insert logo
-		$fp = fopen (APP_PATH ."/images/logo.svg", "rb");
-		$q	= " update _profile set logo_type = 'image/svg+xml', logo = ? where id = 1 ";
-
-		self::$_db_ps = self::$_db->prepare ($q);
-		self::$_db_ps->bindParam (1, $fp, PDO::PARAM_LOB);
-		self::$_db_ps->execute ();
-	}
-//}}}
-//{{{ db : initialize database.
-	public static function db_init ()
-	{
-		if (stristr(self::$_db_url, "sqlite") !== FALSE) {
-			self::db_init_sqlite ();
-			self::$_db_class = "sqlite";
-		} else {
-			self::$_db_class = "postgresql";
-			self::db_create ();
-		}
-	}
-//}}}
-//{{{ db : create PDO object.
-	public static function db_create ()
-	{
-		self::$_db = new SafePDO (self::$_db_url, self::$_db_user, self::$_db_pass);
-		self::$_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}
 //}}}
 //{{{ cookie : get value
@@ -263,13 +145,14 @@ class Jaring
 			self::$_menu_mode		= $app_conf["app.menu.mode"];
 			self::$_paging_size		= $app_conf["app.paging.size"];
 			self::$_media_dir		= "/". $app_conf["app.media.dir"] ."/";
-			self::$_db_url			= $app_conf["db.url"];
-			self::$_db_user			= $app_conf["db.username"];
-			self::$_db_pass			= $app_conf["db.password"];
-			self::$_db_pool_min		= $app_conf["db.pool.min"];
-			self::$_db_pool_max		= $app_conf["db.pool.max"];
 
-			Jaring::$_out = new JaringOut ();
+			self::$_db = new JaringDB ($app_conf["db.url"]
+										, $app_conf["db.username"]
+										, $app_conf["db.password"]
+										, $app_conf["db.pool.min"]
+										, $app_conf["db.pool.max"]
+									);
+			self::$_out = new JaringOut ();
 
 			self::cookies_get ();
 		} catch (Exception $e) {
@@ -278,77 +161,6 @@ class Jaring
 	}
 //}}}
 
-//{{{ db : execute script
-	public static function db_execute_script ($f_sql)
-	{
-		if (! file_exists ($f_sql)) {
-			return false;
-		}
-
-		$f_sql_v	= file_get_contents($f_sql);
-		$queries	= explode (";", $f_sql_v);
-
-		foreach ($queries as $q) {
-			try {
-				self::$_db->exec ($q);
-			} catch (Exception $e) {
-				error_log ($q);
-				throw $e;
-			}
-		}
-
-		return true;
-	}
-//}}}
-//{{{ db : execute query
-	/**
-		q		: query.
-		bindv	: array of binding value, if query containt "?".
-		fetch	: should we fetch after execute? delete statement MUST set to false
-	*/
-	public static function db_execute ($q, $bindv = null, $fetch = true)
-	{
-		$rs = [];
-		$s = true;
-
-		self::$_db_ps = self::$_db->prepare ($q);
-
-		if (null !== $bindv) {
-			$s = self::$_db_ps->execute ($bindv);
-		} else {
-			$s = self::$_db_ps->execute ();
-		}
-
-		if ($s && $fetch) {
-			$rs = self::$_db_ps->fetchAll (PDO::FETCH_ASSOC);
-
-			self::$_db_ps->closeCursor ();
-		}
-
-		return $rs;
-	}
-//}}}
-//{{{ db : prepare fields for where query
-	public static function db_prepare_fields ($fields, $sep = "and", $op = "=")
-	{
-		$s = "";
-
-		foreach ($fields as $k => $v) {
-			if ($k > 0) {
-				$s .= " $sep ";
-			}
-			$s .= " $v $op ? ";
-		}
-
-		return $s;
-	}
-//}}}
-//{{{ db : generate uniq id using timestamp + millisecond
-	public static function db_generate_id ()
-	{
-		return round (microtime (true) * 1000);
-	}
-//}}}
 //{{{ db : generate ID for each data
 	public static function db_prepare_id (&$data)
 	{
@@ -369,56 +181,12 @@ class Jaring
 		if (null !== $id) {
 			foreach ($data as &$d) {
 				if (empty ($d[$id])) {
-					$d[$id] = self::db_generate_id ();
+					$d[$id] = self::$_db->generate_id ();
 				}
 			}
 		}
 	}
 //}}}
-//{{{ db : prepare insert query
-	public static function db_prepare_insert ($table, $fields)
-	{
-		$qbind	= "";
-
-		$nfield	= count ($fields);
-		for ($i = 0; $i < $nfield; $i++) {
-			if ($i > 0) {
-				$qbind .= ",";
-			}
-			$qbind .= "?";
-		}
-
-		$q	=" insert into $table "
-			." (". implode (",", $fields) .")"
-			." values ( $qbind )";
-
-		self::$_db_ps = self::$_db->prepare ($q);
-	}
-//}}}
-//{{{ db : prepare update query
-	public static function db_prepare_update ($table, $fields, $ids)
-	{
-		$qupdate=" update $table ";
-		$qset	=" set ". self::db_prepare_fields ($fields, ",");
-		$qwhere	=" where ". self::db_prepare_fields ($ids);
-
-		$q	= $qupdate
-			. $qset
-			. $qwhere;
-
-		self::$_db_ps = self::$_db->prepare ($q);
-	}
-//}}}
-//{{{ db : prepare delete statement
-	public static function db_prepare_delete ($table, $fields)
-	{
-		$qdelete=" delete from $table";
-		$qwhere	=" where ". self::db_prepare_fields ($fields);
-
-		self::$_db_ps	= self::$_db->prepare ($qdelete . $qwhere);
-	}
-//}}}
-
 //{{{ crud -> db : check system profile id, throw exception if id = 1.
 	public static function request_check_system_profile ($data)
 	{
@@ -548,7 +316,7 @@ class Jaring
 				. $qfrom
 				. $qwhere;
 
-		$rs = self::db_execute ($qtotal);
+		$rs = self::$_db->execute ($qtotal);
 
 		if (count ($rs) <= 0) {
 			$t = 0;
@@ -559,10 +327,10 @@ class Jaring
 		// Get data
 		$qread	= $qselect . $qfrom . $qwhere . $qorder . $qlimit;
 
-		self::$_out->set (true, self::db_execute ($qread), $t);
+		self::$_out->set (true, self::$_db->execute ($qread), $t);
 
 		if (function_exists ("request_read_after")) {
-			request_read_after (self::$_out->_data);
+			request_read_after (self::$_out->data);
 		}
 	}
 //}}}
@@ -580,8 +348,8 @@ class Jaring
 			}
 		}
 
-		self::db_prepare_insert ($table, $fields);
-		self::db_prepare_id ($data);
+		self::$_db->prepare_insert ($table, $fields);
+		self::$_db->prepare_id ($data);
 
 		foreach ($data as $d) {
 			$bindv = [];
@@ -592,8 +360,8 @@ class Jaring
 				}
 			}
 
-			self::$_db_ps->execute ($bindv);
-			self::$_db_ps->closeCursor ();
+			self::$_db->_ps->execute ($bindv);
+			self::$_db->_ps->closeCursor ();
 
 			unset ($bindv);
 		}
@@ -624,7 +392,7 @@ class Jaring
 			}
 		}
 
-		self::db_prepare_update ($table, $fields, $ids);
+		self::$_db->prepare_update ($table, $fields, $ids);
 
 		foreach ($data as $d) {
 			$bindv = [];
@@ -638,8 +406,8 @@ class Jaring
 				array_push ($bindv, $d[$field]);
 			}
 
-			self::$_db_ps->execute ($bindv);
-			self::$_db_ps->closeCursor ();
+			self::$_db->_ps->execute ($bindv);
+			self::$_db->_ps->closeCursor ();
 
 			unset ($bindv);
 		}
@@ -668,7 +436,7 @@ class Jaring
 			self::request_check_system_profile ($data);
 		}
 
-		self::db_prepare_delete (self::$_mod["db_table"]["name"]
+		self::$_db->prepare_delete (self::$_mod["db_table"]["name"]
 								,self::$_mod["db_table"]["id"]
 								);
 
@@ -679,8 +447,8 @@ class Jaring
 				array_push ($bindv, $d[$field]);
 			}
 
-			self::$_db_ps->execute ($bindv);
-			self::$_db_ps->closeCursor ();
+			self::$_db->_ps->execute ($bindv);
+			self::$_db->_ps->closeCursor ();
 
 			unset ($bindv);
 		}
@@ -728,7 +496,7 @@ class Jaring
 			break;
 		}
 
-		self::$_out->_data = $msg;
+		self::$_out->data = $msg;
 		return false;
 	}
 //}}}
@@ -808,6 +576,38 @@ class Jaring
 		return $access;
 	}
 //}}}
+//{{{ crud : check user access to module
+	public static function check_user_access ($mod, $uid, $access)
+	{
+		$q	="
+				select	GM.permission
+				from	_user			U
+				,		_group			G
+				,		_user_group		UG
+				,		_menu			M
+				,		_group_menu		GM
+				where	GM._group_id	= G.id
+				and		GM._menu_id		= M.id
+				and		UG._group_id	= G.id
+				and		UG._user_id		= U.id
+				and		M.module		= '". $mod ."'
+				and		U.id			= ". $uid ."
+				order by GM.permission desc
+				limit	0,1
+			";
+
+		$rs = self::$_db->execute ($q);
+
+		if (count ($rs) <= 0) {
+			return false;
+		}
+		if (((int) $rs[0]["permission"]) >= $access) {
+			return true;
+		}
+
+		return false;
+	}
+//}}}
 //{{{ crud : route request.
 	public static function request_switch ($path, $access, $data)
 	{
@@ -863,7 +663,7 @@ class Jaring
 		$module	= self::get_module_name ($uri);
 
 		try {
-			self::db_init ();
+			self::$_db->init ();
 
 			$access	= self::request_get_access ($mode);
 
@@ -888,11 +688,11 @@ class Jaring
 				self::$_mod["db_table"]["id"][] = $fprofid;
 			}
 
-			self::$_db->beginTransaction ();
+			self::$_db->_dbo->beginTransaction ();
 			self::request_switch ($path, $access, $data);
-			self::$_db->commit ();
+			self::$_db->_dbo->commit ();
 		} catch (Exception $e) {
-			self::$_out->_data = addslashes ($e->getMessage ());
+			self::$_out->data = addslashes ($e->getMessage ());
 		}
 
 		header("Content-Type: application/json");
