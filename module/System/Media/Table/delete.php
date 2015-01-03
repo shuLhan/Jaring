@@ -43,4 +43,4 @@ foreach ($data as $d) {
 	//}}}
 }
 
-Jaring::$_out->set (true, self::$MSG_SUCCESS_DESTROY);
+Jaring::$_out->set (true, self::MSG_SUCCESS_DESTROY);

@@ -50,4 +50,4 @@
 		move_uploaded_file ($_FILES["content"]["tmp_name"], APP_PATH ."/". $bindv[5]);
 	}
 
-	Jaring::$_out->set (true, self::$MSG_SUCCESS_UPDATE);
+	Jaring::$_out->set (true, self::MSG_SUCCESS_UPDATE);

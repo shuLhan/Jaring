@@ -25,4 +25,4 @@
 
 	move_uploaded_file ($_FILES["content"]["tmp_name"], APP_PATH ."/". $fupath);
 
-	Jaring::$_out->set (true, self::$MSG_SUCCESS_CREATE);
+	Jaring::$_out->set (true, self::MSG_SUCCESS_CREATE);

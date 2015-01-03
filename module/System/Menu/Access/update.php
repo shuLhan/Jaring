@@ -45,4 +45,4 @@
 		$ps->closeCursor ();
 	}
 
-	Jaring::$_out->set (true, self::$MSG_SUCCESS_UPDATE);
+	Jaring::$_out->set (true, self::MSG_SUCCESS_UPDATE);

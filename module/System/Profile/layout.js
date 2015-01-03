@@ -48,7 +48,9 @@ function Jx_System_Profile ()
 				if (this.selectedData.length > 0) {
 					System_Profile.logo_image_refresh (this.selectedData[0].get ("id"));
 				}
-				System_Profile.f_user_id.hide ();
+				if (_g_profile_id !== 1) {
+					System_Profile.f_user_id.hide ();
+				}
 			}
 		,	afterAdd : function ()
 			{
@@ -112,7 +114,7 @@ function Jx_System_Profile ()
 				{
 					xtype			:"combo"
 				,	itemId			:"_user_id"
-				,	store			:this.storeUserNon
+				,	store			:this.storeUser
 				,	valueField		:"id"
 				,	displayField	:"realname"
 				,	allowBlank		:false

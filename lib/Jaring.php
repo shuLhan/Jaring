@@ -11,20 +11,20 @@ include "JaringDB.php";
 class Jaring
 {
 //{{{ var : constanta
-	public static $MSG_SUCCESS_UPDATE	= "Data has been updated.";
-	public static $MSG_SUCCESS_CREATE	= "New data has been created.";
-	public static $MSG_SUCCESS_DESTROY	= "Data has been deleted.";
-	public static $MSG_ACCESS_FAIL		= "You don't have sufficient privilege.";
-	public static $MSG_REQUEST_INVALID	= "Invalid request ";
-	public static $MSG_DATA_LOCK		= "This data has been locked, it can not be deleted.";
-	public static $MSG_ADMIN_PROFILE	= "This user is administrator of profile and can not be deleted.";
-	public static $MOD_INIT				= "/init";
+	const MSG_SUCCESS_UPDATE	= "Data has been updated.";
+	const MSG_SUCCESS_CREATE	= "New data has been created.";
+	const MSG_SUCCESS_DESTROY	= "Data has been deleted.";
+	const MSG_ACCESS_FAIL		= "You don't have sufficient privilege.";
+	const MSG_REQUEST_INVALID	= "Invalid request ";
+	const MSG_DATA_LOCK			= "This data has been locked, it can not be deleted.";
+	const MSG_ADMIN_PROFILE		= "This user is administrator of profile and can not be deleted.";
+	const MOD_INIT				= "/init";
 
-	public static $ACCESS_NO		= 0;
-	public static $ACCESS_READ		= 1;
-	public static $ACCESS_CREATE	= 2;
-	public static $ACCESS_UPDATE	= 3;
-	public static $ACCESS_DELETE	= 4;
+	const ACCESS_NO		= 0;
+	const ACCESS_READ	= 1;
+	const ACCESS_CREATE	= 2;
+	const ACCESS_UPDATE	= 3;
+	const ACCESS_DELETE	= 4;
 //}}}
 //{{{ var : static
 	public static $_ext				= ".php";
@@ -40,6 +40,7 @@ class Jaring
 	public static $_paging_size		= 50;
 	public static $_media_dir		= "media";
 	public static $_db				= null;
+	public static $_out				= null;
 
 	//	Module configuration. Set by each modules index.
 	public static $_mod	= [
@@ -63,8 +64,6 @@ class Jaring
 							,	"order"			=> []
 							]
 						];
-
-	public static $_out = null;
 
 	//
 	//	Cookies values.
@@ -138,7 +137,7 @@ class Jaring
 			self::$_ext				= $app_conf["app.extension"];
 			self::$_path			= $app_conf["app.path"];
 			self::$_path_mod		= $app_conf["app.module.dir"];
-			self::$_mod_init		= self::$_path . self::$_path_mod . self::$MOD_INIT . self::$_ext;
+			self::$_mod_init		= self::$_path . self::$_path_mod . self::MOD_INIT . self::$_ext;
 			self::$_mod_home		= self::$_path . self::$_path_mod . "/home/";
 			self::$_mod_main		= self::$_path . self::$_path_mod . "/main/";
 			self::$_content_type	= $app_conf["app.content.type"];
@@ -196,7 +195,7 @@ class Jaring
 		if (self::$_mod["db_table"]["profiled"]) {
 			foreach ($data as $d) {
 				if ($d[$fprofid] === 1 || $d[$fprofid] === "1") {
-					throw new Exception (self::$MSG_DATA_LOCK);
+					throw new Exception (self::MSG_DATA_LOCK);
 				}
 			}
 		}
@@ -349,7 +348,7 @@ class Jaring
 		}
 
 		self::$_db->prepare_insert ($table, $fields);
-		self::$_db->prepare_id ($data);
+		self::db_prepare_id ($data);
 
 		foreach ($data as $d) {
 			$bindv = [];
@@ -374,7 +373,7 @@ class Jaring
 			}
 		}
 
-		self::$_out->set (true, self::$MSG_SUCCESS_CREATE);
+		self::$_out->set (true, self::MSG_SUCCESS_CREATE);
 	}
 //}}}
 //{{{ crud -> db : handle update request
@@ -420,7 +419,7 @@ class Jaring
 			}
 		}
 
-		self::$_out->set (true, self::$MSG_SUCCESS_UPDATE);
+		self::$_out->set (true, self::MSG_SUCCESS_UPDATE);
 	}
 //}}}
 //{{{ crud -> db : handle delete request
@@ -461,7 +460,7 @@ class Jaring
 			}
 		}
 
-		self::$_out->set (true, self::$MSG_SUCCESS_DESTROY);
+		self::$_out->set (true, self::MSG_SUCCESS_DESTROY);
 	}
 //}}}
 
@@ -524,15 +523,15 @@ class Jaring
 	{
 		switch ($method) {
 		case "GET":
-			return self::$ACCESS_READ;
+			return self::ACCESS_READ;
 		case "POST":
-			return self::$ACCESS_CREATE;
+			return self::ACCESS_CREATE;
 		case "PUT":
-			return self::$ACCESS_UPDATE;
+			return self::ACCESS_UPDATE;
 		case "DELETE":
-			return self::$ACCESS_DELETE;
+			return self::ACCESS_DELETE;
 		default:
-			throw new Exception (self::$MSG_REQUEST_INVALID . $method);
+			throw new Exception (self::MSG_REQUEST_INVALID . $method);
 		}
 	}
 //}}}
@@ -541,15 +540,15 @@ class Jaring
 	{
 		switch ($action) {
 		case "read":
-			return self::$ACCESS_READ;
+			return self::ACCESS_READ;
 		case "create":
-			return self::$ACCESS_CREATE;
+			return self::ACCESS_CREATE;
 		case "update":
-			return self::$ACCESS_UPDATE;
+			return self::ACCESS_UPDATE;
 		case "destroy":
-			return self::$ACCESS_DELETE;
+			return self::ACCESS_DELETE;
 		default:
-			throw new Exception (self::$MSG_REQUEST_INVALID
+			throw new Exception (self::MSG_REQUEST_INVALID
 								. $action);
 		}
 	}
@@ -557,7 +556,7 @@ class Jaring
 //{{{ crud : get user access.
 	public static function request_get_access ($mode)
 	{
-		$access	= self::$ACCESS_NO;
+		$access	= self::ACCESS_NO;
 
 		if ("crud" === $mode) {
 			$access = self::request_get_crud_access($_SERVER["REQUEST_METHOD"]);
@@ -612,7 +611,7 @@ class Jaring
 	public static function request_switch ($path, $access, $data)
 	{
 		switch ($access) {
-		case self::$ACCESS_READ:
+		case self::ACCESS_READ:
 			$path .= "read.php";
 			if (file_exists ($path)) {
 				require_once $path;
@@ -621,7 +620,7 @@ class Jaring
 			}
 			break;
 
-		case self::$ACCESS_CREATE:
+		case self::ACCESS_CREATE:
 			$path .= "create.php";
 			if (file_exists ($path)) {
 				require_once $path;
@@ -630,7 +629,7 @@ class Jaring
 			}
 			break;
 
-		case self::$ACCESS_UPDATE:
+		case self::ACCESS_UPDATE:
 			$path .= "update.php";
 			if (file_exists ($path)) {
 				require_once $path;
@@ -639,7 +638,7 @@ class Jaring
 			}
 			break;
 
-		case self::$ACCESS_DELETE:
+		case self::ACCESS_DELETE:
 			$path .= "delete.php";
 			if (file_exists ($path)) {
 				require_once $path;
@@ -669,7 +668,7 @@ class Jaring
 
 			$s		= self::check_user_access ($module, self::$_c_uid, $access);
 			if (false === $s) {
-				throw new Exception (self::$MSG_ACCESS_FAIL);
+				throw new Exception (self::MSG_ACCESS_FAIL);
 			}
 
 			if ("crud" === $mode) {

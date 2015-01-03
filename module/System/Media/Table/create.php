@@ -35,4 +35,4 @@
 
 	Jaring::execute_insert ($table, $fields, $bindv);
 
-	Jaring::$_out->set (true, self::$MSG_SUCCESS_CREATE);
+	Jaring::$_out->set (true, self::MSG_SUCCESS_CREATE);
