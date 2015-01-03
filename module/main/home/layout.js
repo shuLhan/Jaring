@@ -4,19 +4,15 @@
 		- mhd.sulhan (m.shulhan@gmail.com)
 */
 
-function JxMainHomeMenu (jx_main_home, pid, title)
+function JxMainHomeMenu (jx_main_home, title, data)
 {
 	this._parent	= jx_main_home;
 	this.id			= "main_home_menu"
 	this.dir		= Jx.generateModDir (this.id);
 
-	this.store	= Ext.create ("Jx.Store", {
-			url			:this.dir
-		,	singleApi	:false
-		,	extraParams	:
-			{
-				pid			:pid
-			}
+	this.store	= Ext.create ("Ext.data.Store", {
+			id			: this.id
+		,	data		: data
 		,	fields		:
 			[
 				"id"
@@ -30,21 +26,21 @@ function JxMainHomeMenu (jx_main_home, pid, title)
 		});
 
 	this.view			= Ext.create ("Ext.view.View", {
-		store			:this.store
+		store			: this.store
 	,	itemSelector	:"div.home-menu"
 	,	overItemCls		:"home-menu-hover"
 	,	anchor			:"100%"
 	,	tpl				:Ext.create ("Ext.XTemplate"
 			,	'<div id="home-menus">'
-			,		'<tpl for=".">'
-			,			'<div class="home-menu">'
-			,				'<img width="98" height="98"'
-			,					'src="/images/{image_path}" />'
-			,				'<h3>{label}</h3>'
-			,				'<span>{description}</span>'
-			,			'</div>'
-			,		'</tpl>'
-			,	'</div>'
+			+		'<tpl for=".">'
+			+			'<div class="home-menu">'
+			+				'<img width="98" height="98"'
+			+					'src="/images/{image_path}" />'
+			+				'<h3>{label}</h3>'
+			+				'<span>{description}</span>'
+			+			'</div>'
+			+		'</tpl>'
+			+	'</div>'
 			)
 	});
 
@@ -56,8 +52,6 @@ function JxMainHomeMenu (jx_main_home, pid, title)
 			}
 		,	items	:[this.view]
 		});
-
-	this.store.load ();
 
 	this.view.on ("itemclick", this.viewOnClick, this);
 }
@@ -119,8 +113,8 @@ JxMainHome.prototype.storeOnLoad	= function (store, records, success)
 	for (var i = 0; i < records.length; i++) {
 		var p	= new JxMainHomeMenu (
 					this
-				,	records[i].raw.id
 				,	records[i].raw.title
+				,	records[i].raw.data
 				);
 
 		this.panel.add (p.panel);
